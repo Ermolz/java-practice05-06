@@ -1,3 +1,4 @@
+[![Java CI/CD](https://github.com/Ermolz/java-practice05-06/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Ermolz/java-practice05-06/actions/workflows/ci-cd.yml)
 # Practice 5-6: JUnit 6
 
 ## GitHub Actions CI/CD

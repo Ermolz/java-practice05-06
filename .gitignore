@@ -11,6 +11,8 @@ out/
 hs_err_pid*
 replay_pid*
 
+!gradle/wrapper/gradle-wrapper.jar
+
 # IDEs
 .idea/
 *.iml

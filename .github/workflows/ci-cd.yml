@@ -1,0 +1,62 @@
+name: Java CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-package:
+    name: Static analysis, tests, jar and Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Static code analysis and automated tests
+        run: ./gradlew check
+
+      - name: Build jar
+        run: ./gradlew jar
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice5-6-jar
+          path: build/libs/*.jar
+          if-no-files-found: error
+
+      - name: Build Docker image
+        run: docker build -t practice5-6:${{ github.sha }} .
+
+      - name: Save Docker image as artifact file
+        run: |
+          mkdir -p build/docker
+          docker save practice5-6:${{ github.sha }} -o build/docker/practice5-6-docker-image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice5-6-docker-image
+          path: build/docker/practice5-6-docker-image.tar
+          if-no-files-found: error

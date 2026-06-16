@@ -1,0 +1,78 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'checkstyle'
+}
+
+group = 'com.academy.practice56'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+application {
+    mainClass = 'com.academy.practice56.Main'
+}
+
+repositories {
+    mavenCentral()
+}
+
+checkstyle {
+    toolVersion = '10.21.4'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:6.1.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'org.junit.platform:junit-platform-suite'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+
+    doFirst {
+        def requestedPatterns = filter.commandLineIncludePatterns + filter.includePatterns
+
+        if (requestedPatterns.any { it.contains('SmokeSuite') }) {
+            exclude '**/RegressionSuite.class'
+        } else if (requestedPatterns.any { it.contains('RegressionSuite') }) {
+            exclude '**/SmokeSuite.class'
+        } else {
+            exclude '**/suites/*Suite.class'
+        }
+    }
+
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+    }
+}
+
+tasks.register('smokeTest', Test) {
+    description = 'Runs tests tagged as smoke.'
+    group = 'verification'
+
+    useJUnitPlatform {
+        includeTags 'smoke'
+    }
+}
+
+tasks.register('regressionTest', Test) {
+    description = 'Runs tests tagged as regression.'
+    group = 'verification'
+
+    useJUnitPlatform {
+        includeTags 'regression'
+    }
+}
